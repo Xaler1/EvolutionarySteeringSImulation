@@ -6,9 +6,6 @@ public class SimulationSettings implements Serializable {
     public boolean spawn_poison = true;
     public boolean spawn_predators = true;
 
-    public boolean show_forces = false;
-    public boolean show_perceptions = false;
-
     public int initial_animals = 100;
     public int initial_predators = 30;
     public int initial_food = 80;

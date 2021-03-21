@@ -4,6 +4,7 @@ import Helpers.Randomiser;
 import Helpers.Vector2D;
 
 import java.awt.*;
+import java.awt.geom.Line2D;
 
 import static java.lang.Math.min;
 
@@ -22,6 +23,11 @@ public class Predator {
     private SimulationSettings ss;
     private Randomiser r;
 
+    public Shape food_line;
+    public Shape poison_line;
+    public Shape predator_line;
+    public Shape resultant_line;
+
     public double[] dna;
     public double fitness;
     public boolean dead;
@@ -34,6 +40,11 @@ public class Predator {
         this.population = population;
         this.ss = population.ss;
         children = 0;
+
+        food_line = new Line2D.Double(0, 0, 0, 0);
+        poison_line = new Line2D.Double(0, 0, 0, 0);
+        predator_line = new Line2D.Double(0,0,0,0);
+        resultant_line = new Line2D.Double(0, 0, 0, 0);
 
         r = new Randomiser();
         dna = new double[7];
@@ -84,16 +95,28 @@ public class Predator {
         if (closest_animal != null) {
             Vector2D animal_force = closest_animal.location.sub(location).setMag(max_speed).sub(velocity).mul(dna[0]);
             total_force = total_force.add(animal_force);
+            animal_force = animal_force.mul(4);
+            food_line = new Line2D.Double(location.x, location.y, location.x + animal_force.x, location.y + animal_force.y);
+        } else {
+            food_line = new Line2D.Double(0, 0, 0, 0);
         }
 
         if (closest_poison != null) {
             Vector2D poison_force = closest_poison.sub(location).setMag(max_speed).sub(velocity).mul(dna[1]);
             total_force = total_force.add(poison_force);
+            poison_force = poison_force.mul(4);
+            poison_line = new Line2D.Double(location.x, location.y, location.x + poison_force.x, location.y + poison_force.y);
+        } else {
+            poison_line = new Line2D.Double(0, 0, 0, 0);
         }
 
         if (closest_predator != null) {
             Vector2D predator_force = closest_predator.sub(location).setMag(max_speed).sub(velocity).mul(dna[2]);
             total_force = total_force.add(predator_force);
+            predator_force = predator_force.mul(4);
+            predator_line = new Line2D.Double(location.x, location.y, location.x + predator_force.x, location.y + predator_force.y);
+        } else {
+            predator_line = new Line2D.Double(0, 0, 0, 0);
         }
 
         if (location.x < 30 || location.x > 1220 || location.y < 30 || location.y > 920) {
@@ -106,6 +129,9 @@ public class Predator {
         velocity = velocity.add(total_force);
         velocity = velocity.limit(max_speed);
         location = location.add(velocity);
+
+        total_force = total_force.mul(80);
+        resultant_line = new Line2D.Double(location.x, location.y, location.x + total_force.x, location.y + total_force.y);
 
         if (closest_animal != null && closest_animal.location.distanceTo(location) < 10) {
             closest_animal.dead = true;
@@ -149,7 +175,7 @@ public class Predator {
         Predator child = new Predator(location, ss.predator_max_force, ss.predator_max_speed, environment, population);
         child.dna = dna.clone();
         child.mutate();
-        child.health = min(health, child.dna[6]);
+        child.health = min(1.0, min(health, child.dna[6]));
         child.velocity = velocity.mul(-1);
         return child;
     }

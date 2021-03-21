@@ -1,7 +1,5 @@
 package EvolutionarySteering;
 
-import Helpers.Vector2D;
-
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
@@ -13,6 +11,7 @@ public class EvolutionarySteeringMain extends JFrame {
     Environment environment;
     Visualiser visualiser;
     SimulationSettings ss;
+    VisSettings vs;
 
     int i;
     int target = 0;
@@ -21,14 +20,17 @@ public class EvolutionarySteeringMain extends JFrame {
     private final JButton pause_btn;
     private SettingsWindow settings_window;
     private final JFileChooser file_chooser;
+    private final VisWindow vis_window;
     private final FileNameExtensionFilter filter = new FileNameExtensionFilter("Evolution settings", "es");
 
     EvolutionarySteeringMain () {
         ss = new SimulationSettings();
+        vs = new VisSettings();
         environment = new Environment(ss);
         population = new Population(environment, ss);
 
         settings_window = new SettingsWindow(ss);
+        vis_window = new VisWindow(vs);
         JLayeredPane pane = new JLayeredPane();
         add(pane);
 
@@ -46,9 +48,19 @@ public class EvolutionarySteeringMain extends JFrame {
         pause_btn.setBounds(1300, 500, 200, 50);
         pause_btn.setFont(font.deriveFont(24.0f));
 
+        JButton restart_btn = new JButton("Restart");
+        restart_btn.addActionListener(e -> {
+            population.reset();
+            environment.reset();
+            paused = false;
+            pause_btn.setText("Pause");
+        });
+        restart_btn.setBounds(1300, 560, 200, 50);
+        restart_btn.setFont(font.deriveFont(24.0f));
+
         JButton skip_btn = new JButton("Skip 1000 steps");
         skip_btn.addActionListener(e -> { target = i + 1000; });
-        skip_btn.setBounds(1300, 560, 200, 50);
+        skip_btn.setBounds(1300, 620, 200, 50);
         skip_btn.setFont(font.deriveFont(20.0f));
 
         JButton settings_btn = new JButton("Settings");
@@ -57,41 +69,41 @@ public class EvolutionarySteeringMain extends JFrame {
             pause_btn.setText("Resume");
             settings_window.setVisible(true);
         });
-        settings_btn.setBounds(1300, 620, 200, 50);
+        settings_btn.setBounds(1300, 680, 200, 50);
         settings_btn.setFont(font.deriveFont(24.0f));
 
-        JButton restart_btn = new JButton("Restart");
-        restart_btn.addActionListener(e -> {
-            population.reset();
-            environment.reset();
-            paused = false;
-            pause_btn.setText("Pause");
+        JButton vis_settings_btn = new JButton("Visualisation settings");
+        vis_settings_btn.addActionListener(e -> {
+            paused = true;
+            pause_btn.setText("Resume");
+            vis_window.setVisible(true);
         });
-        restart_btn.setBounds(1300, 680, 200, 50);
-        restart_btn.setFont(font.deriveFont(24.0f));
+        vis_settings_btn.setBounds(1300, 740, 200, 50);
+        vis_settings_btn.setFont(font.deriveFont(14.0f));
 
         JButton save_btn = new JButton("Save preset");
         save_btn.addActionListener(e -> {
             savePreset();
         });
-        save_btn.setBounds(1300, 740, 200, 50);
+        save_btn.setBounds(1300, 800, 200, 50);
         save_btn.setFont(font.deriveFont(22.0f));
 
         JButton load_btn = new JButton("Load preset");
         load_btn.addActionListener(e -> {
             loadPreset();
         });
-        load_btn.setBounds(1300, 800, 200, 50);
+        load_btn.setBounds(1300, 860, 200, 50);
         load_btn.setFont(font.deriveFont(22.0f));
 
         file_chooser = new JFileChooser();
         file_chooser.setFileFilter(filter);
-        visualiser = new Visualiser(environment, population, ss, this);
+        visualiser = new Visualiser(environment, population, ss, this, vs);
         visualiser.setBounds(0, 0, 1500, 950);
         environment.addObserver(visualiser);
         environment.update();
 
         pane.add(settings_btn, 2, 0);
+        pane.add(vis_settings_btn, 2, 0);
         pane.add(pause_btn, 2, 0);
         pane.add(skip_btn, 2, 0);
         pane.add(restart_btn, 2, 0);

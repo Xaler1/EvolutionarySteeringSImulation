@@ -14,13 +14,17 @@ public class Visualiser extends JPanel implements PropertyChangeListener {
     private Graphics2D painter;
     private Environment environment;
     private Population population;
+    private VisSettings vs;
     private SimulationSettings ss;
     private EvolutionarySteeringMain parent;
 
-    public Visualiser(Environment environment, Population population, SimulationSettings ss, EvolutionarySteeringMain parent) {
+    public Visualiser(Environment environment, Population population, SimulationSettings ss,
+                      EvolutionarySteeringMain parent, VisSettings vs) {
         this.environment = environment;
         this.population = population;
         this.ss = ss;
+        this.vs = vs;
+        this.parent = parent;
     }
 
     Color getHealthColor(double health, double max_health) {
@@ -88,25 +92,52 @@ public class Visualiser extends JPanel implements PropertyChangeListener {
                 painter.rotate(-1 * animal.rotation, animal.location.x, animal.location.y);
 
                 painter.setStroke(new BasicStroke(3));
-                if (ss.show_forces) {
+                if (vs.show_animal_poison_l) {
                     painter.setColor(Color.red);
                     painter.draw(animal.poison_line);
+                }
+                if (vs.show_animal_food_l) {
                     painter.setColor(Color.green);
                     painter.draw(animal.food_line);
+                }
+                if(vs.show_animal_animal_l) {
+                    painter.setColor(Color.LIGHT_GRAY);
+                    painter.draw(animal.animal_line);
+                }
+                if (vs.show_animal_predator_l) {
+                    painter.setColor(Color.magenta);
+                    painter.draw(animal.predator_line);
+                }
+                if (vs.show_animal_resultant) {
                     painter.setColor(Color.cyan);
                     painter.draw(animal.resultant_line);
                 }
 
-                if (ss.show_perceptions) {
+                if (vs.show_animal_food_p) {
+                    painter.setColor(Color.green);
+                    double r = animal.dna[3];
+                    Shape food_vision = new Ellipse2D.Double(animal.location.x - r, animal.location.y - r, r * 2, r * 2);
+                    painter.draw(food_vision);
+                }
+                if (vs.show_animal_poison_p) {
                     painter.setColor(Color.red);
                     double r = animal.dna[4];
                     Shape poison_vision = new Ellipse2D.Double(animal.location.x - r, animal.location.y - r, r * 2, r * 2);
                     painter.draw(poison_vision);
-                    painter.setColor(Color.green);
-                    r = animal.dna[3];
-                    Shape food_vision = new Ellipse2D.Double(animal.location.x - r, animal.location.y - r, r * 2, r * 2);
-                    painter.draw(food_vision);
                 }
+                if (vs.show_animal_animal_p) {
+                    painter.setColor(Color.lightGray);
+                    double r = animal.dna[6];
+                    Shape animal_vision = new Ellipse2D.Double(animal.location.x - r, animal.location.y - r, r * 2, r * 2);
+                    painter.draw(animal_vision);
+                }
+                if (vs.show_animal_predator_p) {
+                    painter.setColor(Color.magenta);
+                    double r = animal.dna[8];
+                    Shape predator_vision = new Ellipse2D.Double(animal.location.x - r, animal.location.y - r, r * 2, r * 2);
+                    painter.draw(predator_vision);
+                }
+
                 painter.setStroke(new BasicStroke(2));
             }
 
@@ -116,6 +147,45 @@ public class Visualiser extends JPanel implements PropertyChangeListener {
                 painter.draw(predator.body);
                 painter.fill(predator.body);
                 painter.rotate(-1 * predator.rotation, predator.location.x, predator.location.y);
+
+                painter.setStroke(new BasicStroke(3));
+                if (vs.show_predator_poison_l) {
+                    painter.setColor(Color.red);
+                    painter.draw(predator.poison_line);
+                }
+                if(vs.show_predator_animal_l) {
+                    painter.setColor(Color.green);
+                    painter.draw(predator.food_line);
+                }
+                if (vs.show_predator_predator_l) {
+                    painter.setColor(Color.magenta);
+                    painter.draw(predator.predator_line);
+                }
+                if (vs.show_predator_resultant) {
+                    painter.setColor(Color.cyan);
+                    painter.draw(predator.resultant_line);
+                }
+
+                if (vs.show_predator_animal_p) {
+                    painter.setColor(Color.green);
+                    double r = predator.dna[3];
+                    Shape food_vision = new Ellipse2D.Double(predator.location.x - r, predator.location.y - r, r * 2, r * 2);
+                    painter.draw(food_vision);
+                }
+                if (vs.show_predator_poison_p) {
+                    painter.setColor(Color.red);
+                    double r = predator.dna[4];
+                    Shape poison_vision = new Ellipse2D.Double(predator.location.x - r, predator.location.y - r, r * 2, r * 2);
+                    painter.draw(poison_vision);
+                }
+                if (vs.show_predator_predator_p) {
+                    painter.setColor(Color.magenta);
+                    double r = predator.dna[5];
+                    Shape predator_vision = new Ellipse2D.Double(predator.location.x - r, predator.location.y - r, r * 2, r * 2);
+                    painter.draw(predator_vision);
+                }
+
+                painter.setStroke(new BasicStroke(2));
             }
 
             painter.setColor(Color.BLACK);
